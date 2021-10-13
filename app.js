@@ -19,18 +19,25 @@ http.createServer((req, res) => {
     }
     // Contact Page
     else if(url === '/contact'){
-        res.end('<html><head> </head><body><form method="POST" action="/message"><input type="text"><input type="submit"></form></body></html>')
+        res.end('<html><head></head><body><form action="/message" method="POST"><input type="text" name="name"><input type="submit"></form></body></html>')
     }
-
+    // Redirecting request
     else if (url === '/message' && method === 'POST'){
-        console.log(`====[url : ${url}]====[Method : ${method}]====`)
-        console.log(`========================`)
-        fs.writeFileSync(init.params.messagePath,'Hello')
 
-        res.statusCode = 302
-        res.setHeader('Location', '/')
-        res.end()
-
+        const body = []
+        // Chunk data
+        req.on('data', (chunk) => {
+            body.push(chunk)
+        })
+        // Parse data
+        return req.on('end', () => {
+            let msg = Buffer.concat(body).toString()
+            msg = msg.split('=')[1]
+            fs.writeFileSync(init.params.messagePath,msg)
+            res.statusCode = 302
+            res.setHeader('Location', '/')
+            return res.end()
+        })
     }
     // 404 Page Not Found
     else{
@@ -45,7 +52,7 @@ http.createServer((req, res) => {
         res.write('</div>')
         res.write('</body>')
         res.write('</html>')
-        res.end()
+        return res.end()
     }
     console.log('Server Starting on port 3000')
 }).listen(init.params.port)
