@@ -1,5 +1,7 @@
 const http = require('http')
 const init = require('./init')
+const fs = require('fs')
+
 
 
 // Create server
@@ -7,8 +9,28 @@ http.createServer((req, res) => {
     //Header params
     res.setHeader('Content-Type', 'text/html')
     res.setHeader('auther', init.params.user)
-    if(req.url === '/') {
+    // Get url
+    const url = req.url
+    // Get Method
+    const method = req.method
+    // Routes
+    if(url === '/') {
         res.end("Hello")
+    }
+    // Contact Page
+    else if(url === '/contact'){
+        res.end('<html><head> </head><body><form method="POST" action="/message"><input type="text"><input type="submit"></form></body></html>')
+    }
+
+    else if (url === '/message' && method === 'POST'){
+        console.log(`====[url : ${url}]====[Method : ${method}]====`)
+        console.log(`========================`)
+        fs.writeFileSync(init.params.messagePath,'Hello')
+
+        res.statusCode = 302
+        res.setHeader('Location', '/')
+        res.end()
+
     }
     // 404 Page Not Found
     else{
